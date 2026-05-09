@@ -41,7 +41,16 @@ const sidebarItems = [
 
 const Sidebar = () => {
     const dispatch = useDispatch();
-    const { activeTab, emails, sentEmails } = useSelector(store => store.app);
+    const { activeTab, emails, sentEmails, drafts } = useSelector(store => store.app);
+
+    const getCount = (tab) => {
+        switch(tab) {
+            case 'inbox':  return emails?.length;
+            case 'sent':   return sentEmails?.length;
+            case 'drafts': return drafts?.length;
+            default:       return null;
+        }
+    };
 
     return (
         <div className='w-[15%]'>
@@ -55,7 +64,7 @@ const Sidebar = () => {
                 {
                     sidebarItems.map((item, index) => {
                         const isActive = activeTab === item.tab;
-                        const count = item.tab === "inbox" ? emails?.length : item.tab === "sent" ? sentEmails?.length : null;
+                        const count = getCount(item.tab);
                         return (
                             <div
                                 key={index}
@@ -64,7 +73,7 @@ const Sidebar = () => {
                             >
                                 {item.icon}
                                 <p>{item.text}</p>
-                                {count !== null && count > 0 && (
+                                {count !== null && count !== undefined && count > 0 && (
                                     <span className='ml-auto mr-4 text-xs font-bold text-gray-700'>{count}</span>
                                 )}
                             </div>

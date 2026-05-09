@@ -1,21 +1,71 @@
-import React from 'react'
-import { MdCropSquare } from 'react-icons/md'
-import { MdOutlineStarBorder } from "react-icons/md";
+import React, { useState } from 'react'
+import { MdCropSquare, MdOutlineWatchLater } from 'react-icons/md'
+import { MdOutlineStarBorder, MdStar } from "react-icons/md";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { setSelectedEmail } from '../redux/appSlice';
+import { setSelectedEmail, setStarredEmails, setSnoozedEmails } from '../redux/appSlice';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Email = ({email}) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { activeTab } = useSelector(store => store.app);
+    const { user, starredEmails, snoozedEmails } = useSelector(store => store.app);
+
+    const isStarred = starredEmails.some(e => e._id === email._id);
+    const isSnoozed = snoozedEmails.some(e => e._id === email._id);
 
     const openMail = () => {
         dispatch(setSelectedEmail(email));
         navigate(`/mail/${email._id}`);
     }
 
-    // Format date nicely
+    const handleStar = async (e) => {
+        e.stopPropagation();
+        try {
+            const res = await axios.put(`${API_URL}/api/v1/email/${email._id}/star`, {}, { withCredentials: true });
+            if (res.data.success) {
+                if (res.data.starred) {
+                    // Add to starred list
+                    dispatch(setStarredEmails([...starredEmails, res.data.email]));
+                } else {
+                    // Remove from starred list
+                    dispatch(setStarredEmails(starredEmails.filter(e => e._id !== email._id)));
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error('Failed to update star');
+        }
+    }
+
+    const handleSnooze = async (e) => {
+        e.stopPropagation();
+        try {
+            // If already snoozed, un-snooze; otherwise snooze for 1 day
+            const until = isSnoozed ? null : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            const res = await axios.put(
+                `${API_URL}/api/v1/email/${email._id}/snooze`,
+                { until },
+                { withCredentials: true }
+            );
+            if (res.data.success) {
+                if (isSnoozed) {
+                    dispatch(setSnoozedEmails(snoozedEmails.filter(e => e._id !== email._id)));
+                    toast.success('Snooze removed');
+                } else {
+                    dispatch(setSnoozedEmails([...snoozedEmails, res.data.email]));
+                    toast.success('Snoozed for 1 day');
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error('Failed to snooze email');
+        }
+    }
+
     const formatDate = (dateStr) => {
         const date = new Date(dateStr);
         const now = new Date();
@@ -27,17 +77,28 @@ const Email = ({email}) => {
     }
 
     return (
-        <div onClick={openMail} className='flex items-center justify-between border-b border-gray-200 px-4 py-3 text-sm hover:cursor-pointer hover:shadow-md'>
+        <div onClick={openMail} className='flex items-center justify-between border-b border-gray-200 px-4 py-3 text-sm hover:cursor-pointer hover:shadow-md group'>
             <div className='flex items-center gap-3 min-w-[180px]'>
                 <div className='text-gray-400'>
                     <MdCropSquare size={'20px'} />
                 </div>
-                <div className='text-gray-400'>
-                    <MdOutlineStarBorder size={'20px'} />
+                <div
+                    onClick={handleStar}
+                    className={`cursor-pointer transition-colors ${isStarred ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'}`}
+                    title={isStarred ? 'Unstar' : 'Star'}
+                >
+                    {isStarred ? <MdStar size={'20px'} /> : <MdOutlineStarBorder size={'20px'} />}
+                </div>
+                <div
+                    onClick={handleSnooze}
+                    className={`cursor-pointer transition-colors opacity-0 group-hover:opacity-100 ${isSnoozed ? 'text-blue-500 opacity-100' : 'text-gray-400 hover:text-blue-500'}`}
+                    title={isSnoozed ? 'Remove snooze' : 'Snooze for 1 day'}
+                >
+                    <MdOutlineWatchLater size={'18px'} />
                 </div>
                 <div>
                     <h1 className='font-semibold text-gray-900 truncate max-w-[120px]'>
-                        {activeTab === 'sent' ? `To: ${email?.to}` : email?.from || 'Unknown'}
+                        {email?.from || 'Unknown'}
                     </h1>
                 </div>
             </div>

@@ -1,47 +1,72 @@
 import React, { useEffect, useState } from 'react'
 import Email from './Email'
+import Draft from './Draft'
 import useGetAllEmails from '../hooks/useGetAllEmails'
 import { useSelector } from 'react-redux';
 
+const TAB_CONFIG = {
+  inbox:   { emoji: '📭', empty: 'Your inbox is empty',     sub: 'Emails sent to you will appear here' },
+  sent:    { emoji: '📤', empty: 'No sent messages',        sub: 'Emails you send will appear here' },
+  starred: { emoji: '⭐', empty: 'No starred messages',     sub: 'Star emails to find them quickly later' },
+  snoozed: { emoji: '⏰', empty: 'No snoozed messages',     sub: 'Hover an email and click the clock to snooze it' },
+  drafts:  { emoji: '📝', empty: 'No drafts',               sub: 'Start composing to save a draft automatically' },
+  more:    { emoji: '📂', empty: 'Nothing here yet',        sub: '' },
+};
+
 const Emails = () => {
   useGetAllEmails();
-  const { emails, sentEmails, searchText, activeTab } = useSelector(store => store.app);
+  const { emails, sentEmails, starredEmails, snoozedEmails, drafts, searchText, activeTab } = useSelector(store => store.app);
 
-  const currentEmails = activeTab === 'sent' ? sentEmails : emails;
+  const getBaseEmails = () => {
+    switch (activeTab) {
+      case 'sent':    return sentEmails;
+      case 'starred': return starredEmails;
+      case 'snoozed': return snoozedEmails;
+      case 'drafts':  return drafts;
+      case 'inbox':
+      default:        return emails;
+    }
+  };
 
-  const [filterEmail, setFilterEmail] = useState(currentEmails);
+  const [filterEmail, setFilterEmail] = useState([]);
 
   useEffect(() => {
-    const filteredEmail = currentEmails.filter((email) => {
+    const base = getBaseEmails();
+    const filtered = base.filter((email) => {
+      const q = searchText.toLowerCase();
       return (
-        email?.subject?.toLowerCase().includes(searchText.toLowerCase()) ||
-        email?.to?.toLowerCase().includes(searchText.toLowerCase()) ||
-        email?.from?.toLowerCase().includes(searchText.toLowerCase()) ||
-        email?.message?.toLowerCase().includes(searchText.toLowerCase())
+        email?.subject?.toLowerCase().includes(q) ||
+        email?.to?.toLowerCase().includes(q) ||
+        email?.from?.toLowerCase().includes(q) ||
+        email?.message?.toLowerCase().includes(q)
       );
     });
-    setFilterEmail(filteredEmail);
-  }, [searchText, emails, sentEmails, activeTab])
+    setFilterEmail(filtered);
+  }, [searchText, emails, sentEmails, starredEmails, snoozedEmails, drafts, activeTab]);
+
+  const cfg = TAB_CONFIG[activeTab] || TAB_CONFIG.inbox;
 
   if (filterEmail.length === 0) {
     return (
       <div className='flex flex-col items-center justify-center py-20 text-gray-400'>
-        <span className='text-5xl mb-4'>
-          {activeTab === 'sent' ? '📤' : '📭'}
-        </span>
-        <p className='text-lg font-medium'>
-          {activeTab === 'sent' ? 'No sent messages' : 'Your inbox is empty'}
-        </p>
-        <p className='text-sm mt-1'>
-          {activeTab === 'sent' ? 'Emails you send will appear here' : 'Emails sent to you will appear here'}
-        </p>
+        <span className='text-5xl mb-4'>{cfg.emoji}</span>
+        <p className='text-lg font-medium'>{cfg.empty}</p>
+        {cfg.sub && <p className='text-sm mt-1'>{cfg.sub}</p>}
+      </div>
+    );
+  }
+
+  if (activeTab === 'drafts') {
+    return (
+      <div>
+        {filterEmail.map((draft) => <Draft key={draft._id} draft={draft} />)}
       </div>
     );
   }
 
   return (
     <div>
-      {filterEmail && filterEmail?.map((email) => <Email key={email._id} email={email} />)}
+      {filterEmail.map((email) => <Email key={email._id} email={email} />)}
     </div>
   )
 }

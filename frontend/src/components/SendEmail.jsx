@@ -75,60 +75,62 @@ const SendEmail = () => {
     }
 
     return (
-        <div className={`${open ? 'block' : 'hidden'} bg-white max-w-6xl shadow-xl shadow-slate-600 rounded-t-md`}>
-            <div className='flex items-center justify-between px-3 py-2 bg-[#404040] text-white rounded-t-md'>
-                <h1 className='text-sm font-medium'>New Message</h1>
-                <div className='flex items-center gap-2'>
-                    <div onClick={handleClose} className='p-1 rounded hover:bg-gray-600 hover:cursor-pointer' title='Save draft & close'>
-                        <MdMinimize size="18px" />
-                    </div>
-                    <div onClick={handleClose} className='p-1 rounded hover:bg-gray-600 hover:cursor-pointer' title='Save draft & close'>
-                        <RxCross2 size="18px" />
+        <div className={`${open ? 'flex' : 'hidden'} fixed inset-0 sm:inset-auto sm:bottom-0 sm:right-4 z-50 items-end sm:items-start justify-center sm:justify-start`}>
+            <div className='bg-white w-full sm:w-[500px] shadow-xl shadow-slate-600 rounded-t-xl sm:rounded-t-md max-h-[90vh] flex flex-col'>
+                <div className='flex items-center justify-between px-3 py-2 bg-[#404040] text-white rounded-t-xl sm:rounded-t-md shrink-0'>
+                    <h1 className='text-sm font-medium'>New Message</h1>
+                    <div className='flex items-center gap-2'>
+                        <div onClick={handleClose} className='p-1 rounded hover:bg-gray-600 hover:cursor-pointer' title='Save draft & close'>
+                            <MdMinimize size="18px" />
+                        </div>
+                        <div onClick={handleClose} className='p-1 rounded hover:bg-gray-600 hover:cursor-pointer' title='Save draft & close'>
+                            <RxCross2 size="18px" />
+                        </div>
                     </div>
                 </div>
+                <form onSubmit={submitHandler} className='flex flex-col p-3 gap-2 flex-1 overflow-y-auto'>
+                    <input
+                        onChange={changeHandler}
+                        value={formData.to}
+                        name="to"
+                        type="text"
+                        placeholder='To'
+                        className='outline-none py-2 border-b border-gray-200 text-sm'
+                    />
+                    <input
+                        onChange={changeHandler}
+                        value={formData.subject}
+                        name="subject"
+                        type="text"
+                        placeholder='Subject'
+                        className='outline-none py-2 border-b border-gray-200 text-sm'
+                    />
+                    <textarea
+                        onChange={changeHandler}
+                        value={formData.message}
+                        name="message"
+                        rows={'10'}
+                        className='outline-none py-1 text-sm resize-none flex-1 min-h-[200px]'
+                        placeholder='Compose email'
+                    />
+                    <div className='flex items-center justify-between pt-2'>
+                        <button
+                            type='submit'
+                            className='bg-blue-700 rounded-full px-5 py-2 text-sm text-white hover:bg-blue-800 transition-colors'
+                        >
+                            Send
+                        </button>
+                        <button
+                            type='button'
+                            onClick={saveDraft}
+                            disabled={isSavingDraft}
+                            className='text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50'
+                        >
+                            {isSavingDraft ? 'Saving...' : 'Save Draft'}
+                        </button>
+                    </div>
+                </form>
             </div>
-            <form onSubmit={submitHandler} className='flex flex-col p-3 gap-2'>
-                <input
-                    onChange={changeHandler}
-                    value={formData.to}
-                    name="to"
-                    type="text"
-                    placeholder='To'
-                    className='outline-none py-1 border-b border-gray-200 text-sm'
-                />
-                <input
-                    onChange={changeHandler}
-                    value={formData.subject}
-                    name="subject"
-                    type="text"
-                    placeholder='Subject'
-                    className='outline-none py-1 border-b border-gray-200 text-sm'
-                />
-                <textarea
-                    onChange={changeHandler}
-                    value={formData.message}
-                    name="message"
-                    rows={'10'}
-                    className='outline-none py-1 text-sm resize-none'
-                    placeholder='Compose email'
-                />
-                <div className='flex items-center justify-between'>
-                    <button
-                        type='submit'
-                        className='bg-blue-700 rounded-full px-5 py-2 text-sm text-white hover:bg-blue-800 transition-colors'
-                    >
-                        Send
-                    </button>
-                    <button
-                        type='button'
-                        onClick={saveDraft}
-                        disabled={isSavingDraft}
-                        className='text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50'
-                    >
-                        {isSavingDraft ? 'Saving...' : 'Save Draft'}
-                    </button>
-                </div>
-            </form>
         </div>
     )
 }

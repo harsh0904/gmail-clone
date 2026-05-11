@@ -43,11 +43,8 @@ function App() {
 
   return (
     <div className='bg-[#F6F8FC] h-screen'>
-      
       <RouterProvider router={appRouter} />
-      <div className='absolute w-[30%] bottom-0 right-20 z-10'>
-        <SendEmail />
-      </div>
+      <SendEmail />
       <Toaster />
     </div>
   )

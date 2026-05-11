@@ -18,9 +18,10 @@ const Body = () => {
       <Navbar />
       <div className='flex'>
         <Sidebar />
-        <Outlet />
+        <div className='flex-1 min-w-0 pb-16 md:pb-0'>
+          <Outlet />
+        </div>
       </div>
-
     </>
   )
 }

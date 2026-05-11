@@ -62,43 +62,58 @@ const Draft = ({ draft }) => {
     }
 
     return (
-        <div className='flex items-center justify-between border-b border-gray-200 px-4 py-3 text-sm hover:cursor-pointer hover:shadow-md group'>
-            <div className='flex items-center gap-3 min-w-[180px]'>
-                <div className='text-gray-400'>
-                    <MdCropSquare size={'20px'} />
+        <div className='flex items-center border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3 text-sm hover:cursor-pointer hover:shadow-md group'>
+            {/* Left icons */}
+            <div className='flex items-center gap-1 sm:gap-3 shrink-0'>
+                <div className='text-gray-400 hidden sm:block'>
+                    <MdCropSquare size={'18px'} />
                 </div>
                 <div className='text-red-400'>
-                    <MdOutlineDrafts size={'20px'} />
-                </div>
-                <div>
-                    <h1 className='font-semibold text-red-500 truncate max-w-[120px]'>
-                        {draft.to ? `Draft: To ${draft.to}` : 'Draft (no recipient)'}
-                    </h1>
+                    <MdOutlineDrafts size={'18px'} />
                 </div>
             </div>
-            <div className='flex-1 ml-4 flex gap-2 overflow-hidden'>
-                <span className='font-medium text-gray-800 whitespace-nowrap'>
-                    {draft.subject || '(no subject)'}
-                </span>
-                <span className='text-gray-500 truncate'>
-                    — {draft.message || '(no message)'}
-                </span>
+
+            {/* Draft recipient */}
+            <div className='w-24 sm:w-36 shrink-0 ml-1 sm:ml-2'>
+                <h1 className='font-semibold text-red-500 truncate text-xs sm:text-sm'>
+                    {draft.to ? `To: ${draft.to}` : '(no recipient)'}
+                </h1>
             </div>
-            <div className='flex items-center gap-3 flex-none ml-4'>
+
+            {/* Subject + preview */}
+            <div className='flex-1 min-w-0 ml-2 sm:ml-4'>
+                <div className='flex gap-1 sm:gap-2 overflow-hidden'>
+                    <span className='font-medium text-gray-800 text-xs sm:text-sm truncate'>
+                        {draft.subject || '(no subject)'}
+                    </span>
+                    <span className='text-gray-500 text-xs truncate hidden sm:inline'>
+                        — {draft.message || '(no message)'}
+                    </span>
+                </div>
+            </div>
+
+            {/* Actions + Date */}
+            <div className='flex items-center gap-1 sm:gap-3 shrink-0 ml-2'>
                 <button
                     onClick={handleSendDraft}
-                    className='hidden group-hover:block bg-blue-600 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-700 transition-colors'
+                    className='bg-blue-600 text-white text-xs px-2 py-1 rounded-full hover:bg-blue-700 transition-colors sm:hidden group-hover:inline-block'
+                >
+                    Send
+                </button>
+                <button
+                    onClick={handleSendDraft}
+                    className='hidden group-hover:inline-block bg-blue-600 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-700 transition-colors sm:block'
                 >
                     Send
                 </button>
                 <button
                     onClick={handleDeleteDraft}
-                    className='hidden group-hover:block text-red-400 hover:text-red-600 transition-colors'
+                    className='text-red-400 hover:text-red-600 transition-colors'
                     title='Delete draft'
                 >
-                    <MdDelete size={'18px'} />
+                    <MdDelete size={'16px'} />
                 </button>
-                <span className='text-gray-500 text-sm whitespace-nowrap'>{formatDate(draft.updatedAt)}</span>
+                <span className='text-gray-500 text-xs whitespace-nowrap hidden sm:inline'>{formatDate(draft.updatedAt)}</span>
             </div>
         </div>
     )
